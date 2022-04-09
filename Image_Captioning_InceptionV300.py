@@ -43,7 +43,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--folder", type=str, default='Flickr8k_Dataset/Flicker8k_Dataset/',
                     help="folder of the images")
 parser.add_argument("--images", type=str,
-                    help="name of the images, e.g. hehe.jpg")
+                    help="name of the images, seperated by ;, e.g. 'hehe.jpg hihi.jpg'")
 parser.add_argument("--txt", type=str, default='The staff is good.',
                     help="review text")
 
@@ -53,8 +53,12 @@ args = parser.parse_args()
 # images_folder = 'Flickr8k_Dataset/Flicker8k_Dataset/'
 images_folder = args.folder
 # test_images = {'2157173498_2eea42ee38.jpg', '3275537015_74e04c0f3e.jpg'}
-test_images = args.images if args.images else os.listdir(images_folder)
+test_images = set((args.images).split(';')) if args.images else os.listdir(images_folder)
+text = args.txt
 #################################################################################
+print('images_folder:', images_folder)
+print('test_images:', test_images)
+print('text:', text)
 # ######################### values you need to specify ############################
 # images_folder = 'Flickr8k_Dataset/Flicker8k_Dataset/'
 # # test_images = {'2157173498_2eea42ee38.jpg', '3275537015_74e04c0f3e.jpg'}
@@ -428,6 +432,7 @@ def predict_model_ATE(sentence, tokenizer):
     return word_pieces, predictions, outputs
 
 def ATE_ABSA(text):
+    dic = {}
     terms = []
     word = ""
     sent = {0: 'negative', 1: 'neutral', 2: 'positive'}
@@ -456,15 +461,17 @@ def ATE_ABSA(text):
 
     if len(word) != 0:
             terms.append(word.replace(" ##",""))
-
-    print("tokens:", x)
-    print("ATE:", terms)
+    # print("----------------------------------")
+    # print("Text:", text)
+    # print("tokens:", x)
+    # print("ATE:", terms)
 
     if len(terms) != 0:
         for i in terms:
             _, c, p = predict_model_ABSA(text, i, tokenizer)
-            print("term:", [i], "class:", [sent[int(c)]])
-
+            dic[i] = sent[int(c)]
+            # print("term:", [i], "class:", [sent[int(c)]])
+    return dic
 
 # In[630]:
 
@@ -499,7 +506,7 @@ from keras.layers.wrappers import Bidirectional
 from keras.applications.inception_v3 import InceptionV3
 from keras.preprocessing import image
 import os
-DEBUG = False
+DEBUG = True
 
 
 # In[633]:
@@ -1191,7 +1198,12 @@ def predict_captions(image):
 # im = 'Flickr8k_Dataset/Flicker8k_Dataset/IMG_20211006_213803.jpg'
 for im in test_img:
     img_txt = predict_captions(im)
-    ATE_ABSA(img_txt)
+    res_dic = ATE_ABSA(img_txt)
+    print("----------------------------------")
+    print("image name:", im)
+    for key, val in res_dic.items():
+        print('term:', [key], ' class:', [val])
+
 
 # print ('Beam Search, k=3:', beam_search_predictions(im, beam_index=3))
 # print ('Beam Search, k=5:', beam_search_predictions(im, beam_index=5))
@@ -1200,6 +1212,8 @@ for im in test_img:
 
 # In[631]:
 
-
-text = args.txt
-ATE_ABSA(text)
+print("----------------------------------")
+print('text:', text)
+res_dic = ATE_ABSA(text)
+for key, val in res_dic.items():
+    print('term:', [key], ' class:', [val])

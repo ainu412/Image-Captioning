@@ -1,0 +1,6 @@
+image_id	captions
+94232465_a135df2711.jpg	<start> A lady ice skates while pulling a child in a buggy . <end>
+94232465_a135df2711.jpg	<start> A mother pulls her daughter in a wagon over a snowy plain . <end>
+94232465_a135df2711.jpg	<start> A woman pulling a wagon with a girl in it across a frozen lake <end>
+94232465_a135df2711.jpg	<start> The girl pulls a toddler in a cart while skating on the ice . <end>
+94232465_a135df2711.jpg	<start> The woman is ice skating and pulling the little girl in the cart across the ice . <end>
