@@ -1,16 +1,66 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[609]:
-
-
+# In[49]:
+import argparse
 import os
+import warnings
+warnings.filterwarnings("ignore")
+
+def tensorflow_shutup():
+    """
+    Make Tensorflow less verbose
+    """
+    try:
+        os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
+        # noinspection PyPackageRequirements
+        import tensorflow as tf
+        from tensorflow.python.util import deprecation
+
+        tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+
+        # Monkey patching deprecation utils to shut it up! Maybe good idea to disable this once after upgrade
+        # noinspection PyUnusedLocal
+        def deprecated(date, instructions, warn_once=True):  # pylint: disable=unused-argument
+            def deprecated_wrapper(func):
+                return func
+            return deprecated_wrapper
+
+        deprecation.deprecated = deprecated
+
+    except ImportError:
+        pass
+
+# tensorflow_shutup()
+
+
 ######################### values you need to specify ############################
-images_folder = 'Flickr8k_Dataset/Flicker8k_Dataset/'
-# test_images = {'2157173498_2eea42ee38.jpg', '3275537015_74e04c0f3e.jpg'}
+# images_folder = 'Flickr8k_Dataset/Flicker8k_Dataset/'
+# # test_images = {'2157173498_2eea42ee38.jpg', '3275537015_74e04c0f3e.jpg'}
 # test_images = os.listdir(images_folder)
-test_images = {'a.jpg', 'IMG_20211006_213803.jpg'}
+parser = argparse.ArgumentParser()
+parser.add_argument("--folder", type=str, default='Flickr8k_Dataset/Flicker8k_Dataset/',
+                    help="folder of the images")
+parser.add_argument("--images", type=str,
+                    help="name of the images, e.g. hehe.jpg")
+parser.add_argument("--txt", type=str, default='The staff is good.',
+                    help="review text")
+
+
+args = parser.parse_args()
+######################### values you need to specify ############################
+# images_folder = 'Flickr8k_Dataset/Flicker8k_Dataset/'
+images_folder = args.folder
+# test_images = {'2157173498_2eea42ee38.jpg', '3275537015_74e04c0f3e.jpg'}
+test_images = args.images if args.images else os.listdir(images_folder)
 #################################################################################
+# ######################### values you need to specify ############################
+# images_folder = 'Flickr8k_Dataset/Flicker8k_Dataset/'
+# # test_images = {'2157173498_2eea42ee38.jpg', '3275537015_74e04c0f3e.jpg'}
+# test_images = os.listdir(images_folder)
+# # test_images = {'a.jpg', 'IMG_20211006_213803.jpg'}
+# #################################################################################
 
 ## or you can write the name of the images into the file called
 ## 'Flickr8k_text/Flickr_8k.testImages.txt'
@@ -370,9 +420,9 @@ def predict_model_ATE(sentence, tokenizer):
 
     with torch.no_grad():
         outputs = model_ATE(input_tensor, None, None)
-        print('outputs', outputs)
+        # print('outputs', outputs)
         _, predictions = torch.max(outputs, dim=2)
-        print('predictions', predictions)
+        # print('predictions', predictions)
     predictions = predictions[0].tolist()
 
     return word_pieces, predictions, outputs
@@ -393,7 +443,7 @@ def ATE_ABSA(text):
         # print('in y:', y)
 
 
-    print('y', y)
+    # print('y', y)
     for i in range(len(y)):
         if y[i] == 1:
             if len(word) != 0:
@@ -427,11 +477,7 @@ model_ATE = load_model(model_ATE, 'bert_ATE.pkl')
 # 1: neutral
 # 2: positive
 
-# In[631]:
 
-
-text = "The environment is good."
-ATE_ABSA(text)
 
 
 # In[632]:
@@ -488,7 +534,7 @@ train_images_file = 'Flickr8k_text/Flickr_8k.trainImages.txt'
 
 
 train_images = set(open(train_images_file, 'r').read().strip().split('\n'))
-print(train_images)
+# print(train_images)
 
 
 # In[637]:
@@ -967,7 +1013,7 @@ final_model.compile(loss='categorical_crossentropy', optimizer=RMSprop(), metric
 # In[687]:
 
 
-final_model.summary()
+# final_model.summary()
 
 
 # In[688]:
@@ -1152,24 +1198,8 @@ for im in test_img:
 # print ('Beam Search, k=7:', beam_search_predictions(im, beam_index=7))
 # Image.open(im)
 
-
-# In[709]:
-
-
-# im = 'Flickr8k_text/Flickr_8k/IMG_20211006_213803.jpg'
-# img_txt = predict_captions(im)
-# ATE_ABSA(img_txt)
-# Image.open(im)
+# In[631]:
 
 
-# In[710]:
-
-
-ATE_ABSA('The staff is good.')
-
-
-# In[711]:
-
-
-ATE_ABSA(' '.join(['a', 'little', 'boy', 'in', 'a', 'red', 'and', 'white', 'suit', 'plays', 'with', 'a', 'black', 'dog', 'on', 'a', 'snow', '##board', 'into', 'a', 'stream', '.']))
-
+text = args.txt
+ATE_ABSA(text)
