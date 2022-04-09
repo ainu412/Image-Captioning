@@ -32,7 +32,7 @@ def tensorflow_shutup():
     except ImportError:
         pass
 
-# tensorflow_shutup()
+tensorflow_shutup()
 
 
 ######################### values you need to specify ############################
